@@ -1,0 +1,2 @@
+C:/Users/dsoto/OneDrive/Documentos/Proyectos/basgeo/android/app/.cxx/RelWithDebInfo/5dw3o204/x86/CMakeFiles/edit_cache.dir
+C:/Users/dsoto/OneDrive/Documentos/Proyectos/basgeo/android/app/.cxx/RelWithDebInfo/5dw3o204/x86/CMakeFiles/rebuild_cache.dir
