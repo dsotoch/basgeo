@@ -14,24 +14,18 @@ class formulario_login extends StatelessWidget {
   Widget build(BuildContext context) {
     final _providerAuth = Provider.of<Auth>(context);
 
-    return Card(
+    return  Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 50),
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.fromLTRB(20, 50, 20, 50),
         child: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: ListView(
-            padding: EdgeInsets.only(
-              left: 10,
-              right: 10,
-              top: 10,
-              bottom:
-                  MediaQuery.of(context).viewInsets.bottom, // Ajusta al teclado
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Ajusta el tamaño al contenido
             children: [
               const Text(
                 "BIENVENIDO",
@@ -91,7 +85,7 @@ class formulario_login extends StatelessWidget {
                         ),
                       );
                       final loginSuccess =
-                          await _providerAuth.iniciarSesionApiRest();
+                      await _providerAuth.iniciarSesionApiRest();
                       if (loginSuccess?['codigo'] != 200) {
                         if (context.mounted) {
                           Navigator.pop(context);
@@ -100,20 +94,21 @@ class formulario_login extends StatelessWidget {
                         }
                       } else {
                         final respuesta =
-                            await _providerAuth.obtenerDatosUsuarioAutenticado(
-                                loginSuccess?['token']);
+                        await _providerAuth.obtenerDatosUsuarioAutenticado(
+                            loginSuccess?['token']);
                         if (respuesta?['codigo'] == 200) {
                           if (context.mounted) {
                             Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Principal(
-                                    usuario:
-                                        "${respuesta?['mensaje'].nombre} ${respuesta?['mensaje'].apellidos}",
-                                    zona: respuesta?['mensaje'].direccion,
-                                    tipo : respuesta?['mensaje'].tipo, token: loginSuccess?['token'],
-                                  ),
-                                )
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Principal(
+                                  usuario:
+                                  "${respuesta?['mensaje'].nombre} ${respuesta?['mensaje'].apellidos}",
+                                  zona: respuesta?['mensaje'].direccion,
+                                  tipo: respuesta?['mensaje'].tipo,
+                                  token: loginSuccess?['token'],
+                                ),
+                              ),
                             );
                           }
                         }
@@ -138,7 +133,6 @@ class formulario_login extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        // Corregido: Ahora va a la pantalla de recuperación
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -175,7 +169,7 @@ class formulario_login extends StatelessWidget {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

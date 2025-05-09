@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Horarios;
 use App\Models\Notificaciones;
 use App\Models\Ubicacion;
 use Illuminate\Http\Request;
@@ -65,13 +66,41 @@ class ApiControllerUbicacion extends Controller
             $notificacion = Notificaciones::where('usuario_id', $usuario_actual)
                 ->orderBy('id', 'desc')
                 ->first();
-                
+
             $notificacion->update(['hora_llegada' => $request->hora_llegada]);
 
 
             return response()->json(['mensaje' => 'Registro modificado exitosamente.'], 200);
         } catch (\Throwable $th) {
             return response()->json(['mensaje' => $th->getMessage()], 500);
+        }
+    }
+
+    public function guardarHorario(Request $request)
+    {
+        try {
+            // Validación de los datos recibidos
+            $request->validate([
+                'estado' => 'required',
+                'zona' => 'required',
+                'horaInicio' => 'required',
+                'horaFin' => 'required',
+                'dia' => 'required',
+            ]);
+
+            Horarios::updateOrCreate(
+            ['dia' => $request->dia],
+            [
+                'estado' => $request->estado,
+                'zona' => $request->zona,
+                'horaInicio' => $request->horaInicio,
+                'horaFin' => $request->horaFin,
+            ]
+        );
+
+            return response()->json(['mensaje' => 'Registro creado exitosamente.'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['mensaje' => 'Error al crear el registro: ' . $th->getMessage()], 500);
         }
     }
 }

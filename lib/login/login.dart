@@ -8,23 +8,13 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child: const Icon(
-                        Icons.supervised_user_circle_rounded,
-                        color: Colors.black,
-                        weight: 20.0,
-                        size: 150,
-                      )
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: formulario_login(),
-                  ),
-                ],
-              )
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        alignment: Alignment.center,
+        child: formulario_login(),
+      ),
     );
+
   }
 }

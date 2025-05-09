@@ -34,4 +34,7 @@ Route::middleware('auth:sanctum')->controller(ApiControllerUbicacion::class)->gr
         Route::post('/guardarUbicacion', 'store');
         Route::post('/guardar-noti', 'guardarNotificacion');
         Route::post('/update-noti', 'actualizarNotificacion');
+
 });
+
+Route::post('/guardar-horario',[ApiControllerUbicacion::class,'guardarHorario']);

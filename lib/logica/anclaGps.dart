@@ -4,6 +4,7 @@ import 'package:basgeo/logica/preferencias.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
@@ -97,7 +98,9 @@ class AnclaGps extends ChangeNotifier {
     if (!permisos) return false;
 
     if (_suscripcionUbicacion != null) {
-      print("⚠️ El rastreo ya está activo.");
+      if (kDebugMode) {
+        print("⚠️ El rastreo ya está activo.");
+      }
       return false;
     }
 
@@ -114,7 +117,9 @@ class AnclaGps extends ChangeNotifier {
           "marca_de_tiempo": DateTime.now().millisecondsSinceEpoch,
         });
       } catch (e) {
-        print("❌ Error al guardar ubicación: $e");
+        if (kDebugMode) {
+          print("❌ Error al guardar ubicación: $e");
+        }
       }
     });
 
@@ -142,11 +147,15 @@ class AnclaGps extends ChangeNotifier {
           // 🔥 Cambia a "latitud" y "longitud"
           double lat = (data["latitud"] as num).toDouble();
           double lng = (data["longitud"] as num).toDouble();
-          print("📌 Ubicación actualizada: $lat, $lng");
+          if (kDebugMode) {
+            print("📌 Ubicación actualizada: $lat, $lng");
+          }
           return LatLng(lat, lng);
         }
       }
-      print("⚠️ No hay datos válidos en Firestore, devolviendo (0,0).");
+      if (kDebugMode) {
+        print("⚠️ No hay datos válidos en Firestore, devolviendo (0,0).");
+      }
       return LatLng(0, 0);
     });
   }

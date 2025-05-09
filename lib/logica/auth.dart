@@ -4,6 +4,7 @@ import 'package:basgeo/nucleo/dio.dart';
 import 'package:basgeo/nucleo/env.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Auth extends ChangeNotifier {
@@ -94,7 +95,9 @@ class Auth extends ChangeNotifier {
           );
 
       final respuesta = response.data;
-      print(respuesta);
+      if (kDebugMode) {
+        print(respuesta);
+      }
       final usuarioModelo = UsuarioModelo.fromJson(respuesta['usuario']);
       return {'codigo': 200, 'mensaje': usuarioModelo};
     } on DioException catch (e) {

@@ -156,11 +156,14 @@ class DrawerNav extends StatelessWidget {
                 InkWell(
                   onTap: () async {
                     await _providerAuth.cerrarSesion(token);
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Login(),
-                        ));
+                    _providerGps.detenerRastreo();
+                   if(context.mounted){
+                     Navigator.pushReplacement(
+                         context,
+                         MaterialPageRoute(
+                           builder: (context) => Login(),
+                         ));
+                   }
                   },
                   child: const Text(
                     "Cerrar sesión",

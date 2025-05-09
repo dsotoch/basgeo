@@ -7,5 +7,5 @@ class Env {
 
   Env._internal();
 
-  String baseUrl = 'http://192.168.1.106:8000';
+  String baseUrl = 'http://192.168.1.103:8000';
 }

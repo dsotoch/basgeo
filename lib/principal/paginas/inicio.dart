@@ -50,7 +50,7 @@ class Inicio extends StatelessWidget {
                          SingleChildScrollView(
                            scrollDirection: Axis.horizontal,
                            child: FutureBuilder(
-                             future: _providerDatos.obtenerHorario(),
+                             future: _providerDatos.obtenerHorario(tipo),
                              builder: (context, snapshot) {
                                return snapshot.connectionState == ConnectionState.waiting
                                    ? SizedBox(

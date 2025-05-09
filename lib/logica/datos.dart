@@ -1,7 +1,12 @@
 import 'package:basgeo/notificaciones.dart';
+import 'package:basgeo/nucleo/env.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../nucleo/dio.dart';
+import 'modelos/modeloHorario.dart';
 
 class Datos extends ChangeNotifier {
   String _nombres = "";
@@ -18,7 +23,6 @@ class Datos extends ChangeNotifier {
   String get nombres => _nombres;
   String get apellidos => _apellidos;
 
-
   set diaACtual(String dia) {
     _diaActual = dia;
     notifyListeners();
@@ -28,7 +32,7 @@ class Datos extends ChangeNotifier {
   String get tipo => _tipo;
 
   set tipo(String value) {
-    if(_tipo!=value){
+    if (_tipo != value) {
       _tipo = value;
       notifyListeners();
     }
@@ -36,7 +40,7 @@ class Datos extends ChangeNotifier {
 
   // Setters
   set nombres(String value) {
-    if(_nombres!=value){
+    if (_nombres != value) {
       _nombres = value;
       notifyListeners();
     }
@@ -81,7 +85,7 @@ class Datos extends ChangeNotifier {
   String get horaFin => _horaFin;
   int get posicionDia => _posicionDia;
   final Notificaciones _notificaciones = Notificaciones();
-  Future<void> obtenerHorario() async {
+  Future<void> obtenerHorario(String tipo_usuario) async {
     try {
       final db = FirebaseFirestore.instance;
 
@@ -105,6 +109,8 @@ class Datos extends ChangeNotifier {
       }).toList();
 
       List<QuerySnapshot> resultados = await Future.wait(consultas);
+
+
       String dia_actual = diaActual();
       _diaActual = dia_actual;
 
@@ -112,10 +118,34 @@ class Datos extends ChangeNotifier {
         String dia = diasSemana[i];
         QuerySnapshot snapshot = resultados[i];
 
+        for (var doc in snapshot.docs) {
+          // Obtener los datos del documento actual
+          var data = doc.data() as Map<String, dynamic>?;
+
+          if (data != null) {
+            // Crear el objeto ModeloHorario a partir de los datos
+            var modeloHorarioJson = ModeloHorario(
+                estado: data['estado']?.toString() ?? "Desconocido",
+                horaFin: data['horaFin'] ?? "00:00",
+                horaInicio: data['horaInicio'] ?? "00:00",
+                zona: data['zona'] ?? "Las Palmeras",
+                dia: dia ?? "Sin dia"
+            ).toJson();
+
+            // Guardar el horario
+            if(tipo_usuario=="admin"){
+              await guardarHorario(modeloHorarioJson);
+            }
+          } else {
+            print("El documento ${doc.id} no contiene datos.");
+          }
+        }
+
         if (snapshot.docs.isNotEmpty) {
           if (!_existeHorarioHoy) {
             bool horarioEncontrado = snapshot.docs.any((doc) {
               var data = doc.data() as Map<String, dynamic>?;
+
               return data != null &&
                   data.containsKey("estado") &&
                   data["estado"] == true &&
@@ -139,6 +169,7 @@ class Datos extends ChangeNotifier {
                     dia_actual == dia)
                 .map((data) => data!["horaFin"] as String)
                 .firstOrNull;
+
             if (horarioEncontrado) {
               setExisteHorarioHoy(true);
               if (horaInicio != null) {
@@ -206,5 +237,26 @@ class Datos extends ChangeNotifier {
     ];
 
     return diasSemana[now.weekday - 1];
+  }
+
+  Future<Map<String, dynamic>?> guardarHorario(modeloHorarioJson) async {
+    try {
+      final path = "${Env().baseUrl}/api/guardar-horario";
+
+      final response =
+          await DioObjeto().dio.post(path, data: modeloHorarioJson);
+      final respuesta = response.data;
+
+      final mensaje = respuesta['mensaje'] ?? 'Horarios Registrados';
+      if (kDebugMode) {
+        print("Horarios Registrados Correctamente");
+      }
+      return {"mensaje": mensaje, "codigo": 200};
+    } on DioException catch (e) {
+      return {
+        "mensaje": e.response?.data['mensaje'],
+        "codigo": e.response?.statusCode
+      };
+    }
   }
 }
