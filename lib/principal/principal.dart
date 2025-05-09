@@ -1,5 +1,6 @@
 import 'package:basgeo/logica/anclaGps.dart';
 import 'package:basgeo/logica/datos.dart';
+import 'package:basgeo/logica/logicaNotificaciones.dart';
 import 'package:basgeo/principal/nav/drawer.dart';
 import 'package:basgeo/principal/nav/nav_inferior.dart';
 import 'package:basgeo/principal/paginas/alertas.dart';
@@ -42,7 +43,7 @@ class Principal extends StatelessWidget {
             child: IndexedStack(
               index: _providerNavegacion.Index,
               children: [
-                Inicio(
+                Inicio(logicaNotificaciones: LogicaNotificaciones(token: token, context: context),
                   tipo: tipo,
                 ),
                 Ubicacion(),

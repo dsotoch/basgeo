@@ -14,7 +14,7 @@ class Alertas extends StatelessWidget {
   }
 
   String _obtenerHoraMenos5Minutos() {
-    return DateFormat('hh:mm a').format(DateTime.now().subtract(const Duration(minutes: 5)));
+    return DateFormat('hh:mm a').format(DateTime.now());
   }
 
   @override

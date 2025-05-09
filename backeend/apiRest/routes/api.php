@@ -31,7 +31,7 @@ Route::controller(ApiControllerUsuario::class)->group(function () {
 });
 
 Route::middleware('auth:sanctum')->controller(ApiControllerUbicacion::class)->group(function () {
-    return [
-        Route::post('/guardarUbicacion', 'store')
-    ];
+        Route::post('/guardarUbicacion', 'store');
+        Route::post('/guardar-noti', 'guardarNotificacion');
+        Route::post('/update-noti', 'actualizarNotificacion');
 });

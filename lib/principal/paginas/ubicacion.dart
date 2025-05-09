@@ -39,28 +39,7 @@ class Ubicacion extends StatelessWidget {
                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
                         userAgentPackageName: 'com.techub.basgeo',
                       ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: userLocation,
-                            width: 40,
-                            height: 40,
-                            child: const Icon(
-                              Icons.location_on,
-                              size: 30,
-                            ),
-                          ),
-                          Marker(
-                              point: carroLocation,
-                              width: 40,
-                              height: 40,
-                            child: const Icon(
-                              Icons.location_on,
-                              size: 30,
-                            ),
-                          )
-                        ],
-                      ),
+
                       if (route.isNotEmpty)
                         PolylineLayer(
                           polylines: [

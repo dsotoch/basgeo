@@ -1,28 +1,28 @@
 import 'dart:async';
-import 'dart:math';
-import 'package:basgeo/logica/datos.dart';
-import 'package:basgeo/logica/navegacion.dart';
+
 import 'package:basgeo/logica/preferencias.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
 
 class AnclaGps extends ChangeNotifier {
 
-  final ref = FirebaseFirestore.instance.collection("carro_recolector").doc("ubicacion");
+  final ref = FirebaseFirestore.instance
+      .collection("carro_recolector")
+      .doc("ubicacion");
   StreamSubscription<Position>? _suscripcionUbicacion;
-  final Preferencias _preferencias = Preferencias();  // Usar una instancia fija
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final Preferencias _preferencias = Preferencias(); // Usar una instancia fija
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   bool _rastreoActivo = false;
 
-
-  bool _cincoMinutos=false;
-  bool _sacaBasura =false;
+  bool _cincoMinutos = false;
+  bool _sacaBasura = false;
 
   bool get sacaBasura => _sacaBasura;
   bool get cincoMinutos => _cincoMinutos;
@@ -42,127 +42,14 @@ class AnclaGps extends ChangeNotifier {
   }
 
 
-  /// Calcula si el carro está a 5 minutos del usuario
-  void verificarTiempoLlegada() async {
-    try {
-      const double velocidadPromedio = 30.0; // km/h
-      const double minutosObjetivo = 5.0;
 
-      // Obtener ubicación del usuario
-      LatLng userLocation;
-      try {
-        userLocation = await getUserLocation();
-        print("📍 Ubicación del usuario: ${userLocation.latitude}, ${userLocation.longitude}");
-
-      } catch (e) {
-        print("❌ Error al obtener la ubicación del usuario: $e");
-        return;
-      }
-
-      // Escuchar cambios en la ubicación del carro recolector
-      try {
-        getCarroLocation().listen((LatLng? carroLocation) {
-          print("🚛 Ubicación del carro: $carroLocation");
-          if (carroLocation == null) {
-            print("⚠️ Ubicación del carro recolector no disponible.");
-            return;
-          }
-
-          // Calcular la distancia en km
-          double distanciaKm;
-          try {
-            distanciaKm = Geolocator.distanceBetween(
-                userLocation.latitude, userLocation.longitude,
-                carroLocation.latitude, carroLocation.longitude) /
-                1000;
-          } catch (e) {
-            print("❌ Error al calcular la distancia: $e");
-            return;
-          }
-
-          // Calcular tiempo estimado en minutos
-          double tiempoEstimadoMinutos = (distanciaKm / velocidadPromedio) * 60;
-
-          // Notificar cuando falten menos de 5 minutos
-          if (tiempoEstimadoMinutos <= minutosObjetivo && !cincoMinutos) {
-            try {
-              cincoMinutos = true; // Marcamos que ya se notificó
-              mostrarNotificacion(
-                  "Atención 🚛", "El carro recolector llegará en menos de 5 minutos.");
-            } catch (e) {
-              print("❌ Error al mostrar notificación de 5 minutos: $e");
-            }
-          } else if (tiempoEstimadoMinutos > minutosObjetivo) {
-            cincoMinutos = false; // Reset si el carro se aleja
-          }
-
-          // Notificar cuando falten menos de 2 minutos
-          if (tiempoEstimadoMinutos <= 2 && !sacaBasura) {
-            try {
-              sacaBasura = true; // Marcamos que ya se notificó
-              mostrarNotificacion(
-                  "Atención 🚛", "Saca tu basura, el carro recolector está pasando por tu zona.");
-            } catch (e) {
-              print("❌ Error al mostrar notificación de 2 minutos: $e");
-            }
-          } else if (tiempoEstimadoMinutos > 2) {
-            sacaBasura = false; // Reset si el carro se aleja
-          }
-        });
-      } catch (e) {
-        print("❌ Error al escuchar la ubicación del carro: $e");
-      }
-    } catch (e) {
-      print("❌ Error general en verificarTiempoLlegada: $e");
-    }
-  }
-
-  Future<void> iniciarAnclaGps(String tipo) async { // ✅ Ahora es un método válido
-    await verificarPermisos();
-    await inicializar();
-    if(tipo == "cliente"){
-      verificarTiempoLlegada();
-      print("TIEMPO DE LLEGADAA CORRIENDO${tipo}");
-    }else{
-      print("TIEMPO DE LLEGADAA  NO CORRIENDO${tipo}");
-
-    }
-  }
-
-
-  static final FlutterLocalNotificationsPlugin _notificaciones =
-  FlutterLocalNotificationsPlugin();
-
-  static Future<void> inicializar() async {
-    const AndroidInitializationSettings androidSettings =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final InitializationSettings settings =
-    InitializationSettings(android: androidSettings);
-
-    await _notificaciones.initialize(settings);
-  }
-
-  static Future<void> mostrarNotificacion(String titulo, String mensaje) async {
-    int idAleatorio = Random().nextInt(1000000);
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'canal_id', 'Canal de Notificaciones',
-      importance: Importance.high,
-      priority: Priority.high,
-      styleInformation: BigTextStyleInformation(''), // Habilita texto largo
-
-    );
-
-    const NotificationDetails detalles = NotificationDetails(android: androidDetails);
-
-    await _notificaciones.show(idAleatorio, titulo, mensaje, detalles);
-  }
 
 
 
 
   Future<void> _cargarEstadoGps() async {
-    bool estadoGuardado = await _preferencias.loadData(); // Garantiza `false` si es null
+    bool estadoGuardado =
+        await _preferencias.loadData(); // Garantiza `false` si es null
     _rastreoActivo = estadoGuardado;
     notifyListeners();
   }
@@ -174,16 +61,17 @@ class AnclaGps extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get esRastreoActivo =>_rastreoActivo;
+  bool get esRastreoActivo => _rastreoActivo;
 
-  dynamic _routePoints= null;
+  dynamic _routePoints = null;
 
-   set routePoints(dynamic now){
-     _routePoints=now;
-     notifyListeners();
-   }
+  set routePoints(dynamic now) {
+    _routePoints = now;
+    notifyListeners();
+  }
 
-   dynamic get routePoints =>_routePoints;
+  dynamic get routePoints => _routePoints;
+
   /// 🔍 Verifica si los permisos están concedidos
   Future<bool> verificarPermisos() async {
     LocationPermission permiso = await Geolocator.checkPermission();
@@ -234,15 +122,12 @@ class AnclaGps extends ChangeNotifier {
     return true;
   }
 
-
   /// ⛔ Detiene el rastreo de ubicación
   void detenerRastreo() {
     _suscripcionUbicacion?.cancel();
     _suscripcionUbicacion = null;
     esRastreoActivo = false;
   }
-
-
 
   Future<LatLng> getUserLocation() async {
     Position position = await Geolocator.getCurrentPosition();
@@ -253,8 +138,8 @@ class AnclaGps extends ChangeNotifier {
     return ref.snapshots().map((snapshot) {
       final data = snapshot.data();
       if (data != null) {
-
-        if (data.containsKey("latitud") && data.containsKey("longitud")) {  // 🔥 Cambia a "latitud" y "longitud"
+        if (data.containsKey("latitud") && data.containsKey("longitud")) {
+          // 🔥 Cambia a "latitud" y "longitud"
           double lat = (data["latitud"] as num).toDouble();
           double lng = (data["longitud"] as num).toDouble();
           print("📌 Ubicación actualizada: $lat, $lng");
@@ -265,10 +150,6 @@ class AnclaGps extends ChangeNotifier {
       return LatLng(0, 0);
     });
   }
-
-
-
-
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final url =
