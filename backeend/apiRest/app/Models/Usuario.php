@@ -11,7 +11,8 @@ class Usuario extends Model
         "nombre",
         "apellidos",
         "tipo",
-        "direccion"
+        "direccion",
+        "user_id"
     ];
 
     public function ubicacion()

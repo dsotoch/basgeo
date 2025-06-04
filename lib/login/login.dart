@@ -1,8 +1,6 @@
-import 'package:basgeo/principal/principal.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:basgeo/login/formulario_login.dart';
-import 'package:basgeo/login/imagen.dart';
 
 class Login extends StatelessWidget {
   @override

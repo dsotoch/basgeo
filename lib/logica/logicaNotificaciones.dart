@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:basgeo/logica/anclaGps.dart';
@@ -7,11 +8,14 @@ import 'package:basgeo/nucleo/env.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:audioplayers/audioplayers.dart';
+
+import '../login/segundoplano.dart';
 
 class LogicaNotificaciones {
   final String token;
@@ -85,10 +89,50 @@ class LogicaNotificaciones {
     await verificarPermisos();
     await inicializar();
     if (tipo == "cliente") {
+      iniciarForegroundTask();
       verificarTiempoLlegada();
-      print("TIEMPO DE LLEGADAA CORRIENDO${tipo}");
     } else {
       print("TIEMPO DE LLEGADAA  NO CORRIENDO${tipo}");
+    }
+  }
+
+  Future<void> iniciarForegroundTask() async {
+    final NotificationPermission notificationPermission =
+        await FlutterForegroundTask.checkNotificationPermission();
+    if (notificationPermission != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
+    }
+
+    if (Platform.isAndroid) {
+      // Android 12+, there are restrictions on starting a foreground service.
+      //
+      // To restart the service on device reboot or unexpected problem, you need to allow below permission.
+      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+        // This function requires `android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission.
+        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+      }
+    }
+    await _startService();
+  }
+
+  Future<ServiceRequestResult> _startService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      return FlutterForegroundTask.restartService();
+    } else {
+      return FlutterForegroundTask.startService(
+        // You can manually specify the foregroundServiceType for the service
+        // to be started, as shown in the comment below.
+        // serviceTypes: [
+        //   ForegroundServiceTypes.dataSync,
+        //   ForegroundServiceTypes.remoteMessaging,
+        // ],
+        serviceTypes: [ForegroundServiceTypes.location],
+        serviceId: 250,
+        notificationTitle: 'Rastreo activo',
+        notificationText: 'Tu ubicación se está compartiendo en tiempo real',
+
+        callback: startCallback,
+      );
     }
   }
 
@@ -132,7 +176,7 @@ class LogicaNotificaciones {
           }
 
           // Calcular tiempo estimado en minutos
-          double tiempoEstimadoMinutos = (distanciaKm / velocidadPromedio) * 60;
+          double tiempoEstimadoMinutos = (distanciaKm / velocidadPromedio) * 30;
 
           // Notificar cuando falten menos de 5 minutos
           if (tiempoEstimadoMinutos <= minutosObjetivo &&
@@ -166,8 +210,8 @@ class LogicaNotificaciones {
             provider.cincoMinutos = false; // Reset si el carro se aleja
           }
 
-          // Notificar cuando falten menos de 2 minutos
-          if (tiempoEstimadoMinutos <= 2 && !provider.sacaBasura) {
+          // Notificar cuando falten menos de 1 minutos
+          if (tiempoEstimadoMinutos <= 1 && !provider.sacaBasura) {
             try {
               provider.sacaBasura = true; // Marcamos que ya se notificó
               mostrarNotificacion(
@@ -279,5 +323,4 @@ class LogicaNotificaciones {
       }
     }
   }
-
 }

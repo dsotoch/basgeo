@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/usuario', function (Request $request) {
     return response()->json([
-        'usuario' => Usuario::find($request->user()->id), 
+        'usuario' => Usuario::where("user_id",$request->user()->id)->first(), 
     ]);
 });
 

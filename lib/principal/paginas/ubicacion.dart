@@ -50,6 +50,13 @@ class Ubicacion extends StatelessWidget {
                             ),
                           ],
                         ),
+                      MarkerLayer(markers:
+
+                      [
+                        Marker(point: carroLocation, child: Icon(Icons.car_crash_rounded)),
+                        Marker(point: userLocation, child: Icon(Icons.gps_fixed)),
+
+                      ])
                     ],
                   );
                 },

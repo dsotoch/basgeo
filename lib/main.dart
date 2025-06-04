@@ -10,7 +10,9 @@ import 'package:basgeo/login/login.dart';
 import 'package:basgeo/principal/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:google_api_availability/google_api_availability.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
@@ -29,6 +31,7 @@ Future<void> fixSSLProvider() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Asegura la inicialización de Flutter
+  FlutterForegroundTask.initCommunicationPort();
   runApp(
     AppInicializador()
   );
@@ -70,7 +73,23 @@ class MyApp extends StatelessWidget {
 class AppInicializador extends StatelessWidget {
   Future<void> _inicializarServicios() async {
     await Future.delayed(const Duration(seconds: 3)); // Espera 3 segundos
-
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'ubicacion_canal',
+        channelName: 'Ubicación en segundo plano',
+        channelDescription: 'Notificación para mantener el servicio en ejecución',
+        channelImportance: NotificationChannelImportance.LOW,
+        priority: NotificationPriority.LOW,
+        
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(),
+      foregroundTaskOptions:  ForegroundTaskOptions(
+       
+        autoRunOnBoot: true,
+        allowWakeLock: true,
+        allowWifiLock: true, eventAction: ForegroundTaskEventAction.repeat(5000),
+      ),
+    );
     await iniciarFirebase();
     await fixSSLProvider();
   }

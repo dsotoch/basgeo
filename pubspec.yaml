@@ -50,6 +50,9 @@ dependencies:
   toastification: ^3.0.2
   google_api_availability: ^5.0.1
   audioplayers: ^6.4.0
+  flutter_foreground_task: ^9.1.0
+  permission_handler: ^11.0.0
+  fl_location: ^5.0.0
 
 dev_dependencies:
   flutter_test:

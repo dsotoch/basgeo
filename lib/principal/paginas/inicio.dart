@@ -4,6 +4,7 @@ import 'package:basgeo/logica/anclaGps.dart';
 import 'package:basgeo/logica/datos.dart';
 import 'package:basgeo/logica/logicaNotificaciones.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class Inicio extends StatelessWidget {
@@ -15,7 +16,6 @@ class Inicio extends StatelessWidget {
     var tamanio = MediaQuery.of(context).size;
     var _providerDatos = Provider.of<Datos>(context);
     final _providerAncla = Provider.of<AnclaGps>(context);
-
     return
        FutureBuilder<dynamic>(future: logicaNotificaciones.iniciarAnclaGps(tipo), builder: (context, snapshot) {
          if(snapshot.connectionState==ConnectionState.waiting){
@@ -171,4 +171,5 @@ class Inicio extends StatelessWidget {
 
 
   }
+
 }

@@ -33,18 +33,20 @@ class ApiControllerUsuario extends Controller
         }
 
         try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+            ]);
             $usuario = Usuario::create([
                 'nombre' => $validated['nombre'],
                 'apellidos' => $validated['apellidos'],
                 'tipo' => $validated['tipo'],
                 'direccion' => $validated['direccion'],
+                'user_id' => $user->id
             ]);
 
-            User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => bcrypt($validated['password']),
-            ]);
+
 
             return response()->json(['mensaje' => $usuario], 200);
         } catch (\Throwable $th) {

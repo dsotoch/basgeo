@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:basgeo/logica/auth.dart';
 import 'package:basgeo/login/registrarse.dart';
 import 'package:basgeo/login/reset.dart';
 import 'package:basgeo/principal/principal.dart';
+import 'package:fl_location/fl_location.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'login.dart';
@@ -77,6 +82,8 @@ class formulario_login extends StatelessWidget {
                   ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      await requestPermissions();
+
                       showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -176,4 +183,55 @@ class formulario_login extends StatelessWidget {
       ),
     );
   }
+  Future<void> requestPermissions() async {
+    await Permission.location.request();
+    await _requestLocationPermission(background: true);
+  }
+  Future<bool> _requestLocationPermission({bool background = false}) async {
+    if (!await FlLocation.isLocationServicesEnabled) {
+      // Location services is disabled.
+      return false;
+    }
+
+    LocationPermission permission = await FlLocation.checkLocationPermission();
+    if (permission == LocationPermission.denied) {
+      // Android: ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION
+      // iOS 12-: NSLocationWhenInUseUsageDescription or NSLocationAlwaysAndWhenInUseUsageDescription
+      // iOS 13+: NSLocationWhenInUseUsageDescription
+      permission = await FlLocation.requestLocationPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      // Location permission has been ${permission.name}.
+      return false;
+    }
+
+    // Web: Only allow whileInUse permission.
+    if (kIsWeb || kIsWasm) {
+      return true;
+    }
+
+    // Android: You must request location permission one more time to access background location.
+    // iOS 12-: You can request always permission through the above request.
+    // iOS 13+: You can only request whileInUse permission. When the app enters the background,
+    // a prompt will appear asking for always permission.
+    if (Platform.isAndroid &&
+        background &&
+        permission == LocationPermission.whileInUse) {
+      // You need a clear explanation of why your app's feature needs access to background location.
+      // https://developer.android.com/develop/sensors-and-location/location/permissions#request-background-location
+
+      // Android: ACCESS_BACKGROUND_LOCATION
+      permission = await FlLocation.requestLocationPermission();
+
+      if (permission != LocationPermission.always) {
+        // Location permission must always be granted to collect location in the background.
+        return false;
+      }
+    }
+
+    return true;
+  }
+
 }

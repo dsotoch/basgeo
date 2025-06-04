@@ -75,6 +75,7 @@ class Auth extends ChangeNotifier {
 
       return {"token": token, "mensaje": mensaje, "codigo": 200};
     } on DioException catch (e) {
+      print(e);
       return {
         "mensaje": e.response?.data['mensaje'],
         "codigo": e.response?.statusCode
@@ -96,7 +97,7 @@ class Auth extends ChangeNotifier {
 
       final respuesta = response.data;
       if (kDebugMode) {
-        print(respuesta);
+        print("✖️$respuesta");
       }
       final usuarioModelo = UsuarioModelo.fromJson(respuesta['usuario']);
       return {'codigo': 200, 'mensaje': usuarioModelo};
